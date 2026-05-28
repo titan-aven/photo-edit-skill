@@ -1,0 +1,29 @@
+# Photo editing pipeline dependencies
+#
+# Install with: pip install -r requirements.txt
+# Or run: bash setup.sh
+#
+# Primary target: Apple Silicon (MPS) — torch 2.2+ has solid MPS support
+# Secondary: NVIDIA CUDA
+# Fallback: CPU (slow but universal)
+
+# ── Core ML / diffusion ───────────────────────────────────────────────────
+diffusers>=0.27.0          # StableDiffusionInpaintPipeline + schedulers
+transformers>=4.40.0       # Required by diffusers for tokenizers/text encoders
+accelerate>=0.30.0         # Faster model loading, device placement helpers
+torch>=2.2.0               # Core tensor library; 2.2+ has improved MPS support
+
+# ── Image handling ────────────────────────────────────────────────────────
+Pillow>=10.0.0             # PIL — image load/save/transform throughout
+
+# ── Face detection ────────────────────────────────────────────────────────
+mediapipe>=0.10.0          # Lightweight face detection; no CUDA required
+
+# ── Quality metrics ───────────────────────────────────────────────────────
+scikit-image>=0.22.0       # SSIM for face preservation scoring
+
+# ── Numerics ─────────────────────────────────────────────────────────────
+numpy>=1.24.0              # Array operations throughout processors/
+
+# ── Model caching (already a diffusers/transformers dep, but explicit) ────
+huggingface-hub>=0.22.0    # try_to_load_from_cache for is_available() check
