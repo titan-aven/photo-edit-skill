@@ -1,0 +1,47 @@
+name: CI (lint + tests)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install ruff
+        run: pip install ruff
+      - name: Ruff lint (advisory, non-blocking for now)
+        run: ruff check . || true
+      # NOTE: ruff is new in this repo; set to blocking (remove `|| true`)
+      # once the existing codebase has been brought to a clean baseline.
+
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Check for a test suite
+        id: check
+        run: |
+          if find . -iname "test_*.py" -o -iname "*_test.py" | grep -q .; then
+            echo "has_tests=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_tests=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::No pytest-style tests found yet in this repo."
+          fi
+      - name: Run tests
+        if: steps.check.outputs.has_tests == 'true'
+        run: |
+          pip install pytest
+          pytest -q
